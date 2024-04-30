@@ -358,8 +358,13 @@ def run_experiment(sizes):
 
         print(f"Graph PUSH-RELABEL's Time: {elapsed_time}")
 
-        if max_flow_1 != max_flow_2:
-            print("ERROE!!")
+        try:
+            assert max_flow_1 == max_flow_2
+        except:
+            print("Max flow not equal")
+            print(f"Max flow Dinic: {max_flow_1}")
+            print(f"Max flow PushRelabel: {max_flow_2}")
+            
 
         # print(f"Graph size: {size}, Max flow: {max_flow_1}, Time taken: {elapsed_time} seconds")
     return times_1, times_2
@@ -376,7 +381,7 @@ def plot_results(sizes, times_1, times_2):
 
 if __name__ == "__main__":
     sizes = []  # Example sizes, adjust as needed
-    for i in range(100, 5001, 100):
+    for i in range(100, 2001, 100):
         sizes.append(i)
     times_1, times_2 = run_experiment(sizes)
     plot_results(sizes, times_1, times_2)
