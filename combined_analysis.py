@@ -311,32 +311,16 @@ def read_dimacs(file_path):
     for u, v, capacity in edges:
         graph_dicnic.addEdge(u, v, capacity)
         graph_pushR.addEdge(u, v, capacity)
-
-    
-
     return graph_dicnic, graph_pushR
 
 
-def generate_random_graph(size, density = 1.0):
-    # Generate a random graph using networkx
-    G = nx.dense_gnm_random_graph(size, size * density)
-    # Convert networkx graph to the format required by Dinic's Algorithm
-    graph_dinic = Graph_Dinic(size)
-    graph_pushR = Graph_PushRelabel(size)
-    for u, v in G.edges():
-
-        capacity = random.randint(size/10, size)  # Random capacity for each edge
-
-        graph_dinic.addEdge(u, v, capacity)
-        graph_pushR.addEdge(u, v, capacity)
-    
-    return graph_dinic, graph_pushR
 
 def run_experiment(sizes):
     times_1 = []
     times_2 = []
     for size in sizes:
-        g_1, g_2 = read_dimacs(f"testing_dataset/s_{size}.max")
+        #g_1, g_2 = read_dimacs(f"acyclic/s_{size}.max") # if reading acyclic graphs
+        g_1, g_2 = read_dimacs(f"random/r_{size}.max") # if reading random graphs
         print("Graph Size: ", size) 
 
         start_time = time.time()
@@ -379,13 +363,26 @@ def plot_results(sizes, times_1, times_2):
 
 if __name__ == "__main__":
     sizes = [100]  # Example sizes, adjust as needed
-    for i in range(200, 1001, 200):
+    for i in range(100, 1001, 100):
         sizes.append(i)
     times_1, times_2 = run_experiment(sizes)
     plot_results(sizes, times_1, times_2)
 
 
 
+# def generate_random_graph(size, density = 1.0):
+#     # Generate a random graph using networkx
+#     G = nx.dense_gnm_random_graph(size, size * density)
+#     # Convert networkx graph to the format required by Dinic's Algorithm
+#     graph_dinic = Graph_Dinic(size)
+#     graph_pushR = Graph_PushRelabel(size)
+#     for u, v in G.edges():
+
+#         capacity = random.randint(size/10, size)  # Random capacity for each edge
+
+#         graph_dinic.addEdge(u, v, capacity)
+#         graph_pushR.addEdge(u, v, capacity)
+    
+#     return graph_dinic, graph_pushR
+
  
-# This code is contributed by rupasriachanta421.
-#https://www.geeksforgeeks.org/dinics-algorithm-maximum-flow/
