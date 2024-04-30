@@ -289,34 +289,32 @@ class Graph_PushRelabel:
         return self.ver[len(self.ver)-1].e_flow
     
 
-
 def read_dimacs(file_path):
     with open(file_path, 'r') as f:
         lines = f.readlines()
 
     num_vertices = 0
+    num_edges = 0
     edges = []
 
     for line in lines:
         tokens = line.strip().split()
         if tokens[0] == 'p':
             num_vertices = int(tokens[2])
+            num_edges = int(tokens[3])
         elif tokens[0] == 'a':
             u, v, capacity = map(int, tokens[1:])
             edges.append((u - 1, v - 1, capacity))  # Convert to 0-indexed vertices
 
-    graph = Graph_Dinic(num_vertices)
+    graph_dicnic = Graph_Dinic(num_vertices)
+    graph_pushR = Graph_PushRelabel(num_vertices)
     for u, v, capacity in edges:
-        graph.add_edge(u, v, capacity)
+        graph_dicnic.addEdge(u, v, capacity)
+        graph_pushR.addEdge(u, v, capacity)
 
-    file_name = file_path.split('/')[-1]  # Extract file name
-    parts = file_name.split('_')
-    num_vertices = int(parts[1])
-    num_edges = int(parts[3])
-    max_capacity = int(parts[5])
-    print(f"Nodes: {num_vertices}, Edges: {num_edges}, Max Capacity: {max_capacity}")
+    
 
-    return graph
+    return graph_dicnic, graph_pushR
 
 
 def generate_random_graph(size, density = 1.0):
@@ -338,7 +336,7 @@ def run_experiment(sizes):
     times_1 = []
     times_2 = []
     for size in sizes:
-        g_1, g_2= generate_random_graph(size) 
+        g_1, g_2 = read_dimacs(f"testing_dataset/s_{size}.max")
         print("Graph Size: ", size) 
 
         start_time = time.time()
@@ -380,8 +378,8 @@ def plot_results(sizes, times_1, times_2):
     plt.show()
 
 if __name__ == "__main__":
-    sizes = []  # Example sizes, adjust as needed
-    for i in range(100, 2001, 100):
+    sizes = [100]  # Example sizes, adjust as needed
+    for i in range(200, 1001, 200):
         sizes.append(i)
     times_1, times_2 = run_experiment(sizes)
     plot_results(sizes, times_1, times_2)

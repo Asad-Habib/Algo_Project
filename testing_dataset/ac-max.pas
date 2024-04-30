@@ -51,41 +51,21 @@
  full causes a run-time error.
 }
 
-Program AcyclicNetwork(input,netres,output);
+Program AcyclicNetwork(input,netres);
 
-  type string = packed array [1..20] of char;
   var
     cap:real;
-    y,p,q,i,k,num,try,arcnumber:integer;
-    node_i,node_j,num_arcs,num_nodes,capacity:integer;
-    tail,head:integer;
+    y,p,q,i,k,num,try,arcnumber:longint;
+    node_i,node_j,num_arcs,num_nodes,capacity:longint;
+    tail,head:longint;
     ch:char;
     done,special,sparse:boolean;
-    OutFileName:string;
+    OutFileName:string[20];
     netres:text;
-    source:integer;
-    sink:integer;
+    source:longint;
+    sink:longint;
 
-  {Two new Sun-compatible RNG procedures added by McGeoch 11/90}
-  Procedure Randomize;
-  var i: integer;
-    Begin
-    	{Pascal function seed(n) sets therng seed to n and returns the
-	 previous value.  Integer function wallclock returns the number
-	 of seconds elapsed since sometime in 1970. 
-	 }
-	 i:= seed(wallclock);
-     End;
-     
-  Function irandom(top:integer): integer;
-    {Returns an integer from 0..(top-1) }
-    Begin
-    	{My local Pascal function random(x) ignores its real argument
-	 x.  It is not the seed.}
-	 irandom := trunc(random(0.0)*top);
-    End;
-
-    Procedure WriteArc;
+  Procedure WriteArc;
   Begin
     write(netres,'a');
     writeln(netres,tail:10,head:10,cap:10:0);
@@ -302,9 +282,10 @@ Program AcyclicNetwork(input,netres,output);
   Procedure Banner5;
     Begin
       writeln('  The network is completed. The data');
-      writeln('  file is an ASCII file, with name:');
-	  writeln('  ',OutFileName,',and can be');
-      writeln('  accessed with your editor.');
+      writeln('  file is an ASCII file, and can be');
+      writeln('  accessed with your editor. You may');
+      writeln('  print the file using the DOS');
+      writeln('  command PRINT ',OutFileName,'.max.');
     End;
 
   Procedure UserValues;
@@ -370,10 +351,10 @@ Begin
   Begin
     write('  Enter name of the output file: ');
     readln(OutFileName);
-{ SUN     assign(netres,OutFileName+'.max'); }
-    rewrite(netres,OutFileName);
+    assign(netres,OutFileName+'.max');
+    rewrite(netres);
     UserValues;
-{ SUN     close(netres); }
+    close(netres);
     Banner5;
   End;
 End.
