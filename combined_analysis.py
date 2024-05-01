@@ -443,8 +443,8 @@ def run_experiment(sizes):
     times_2 = []
     times_3 = []
     for size in sizes:
-        g_1, g_2, g_3 = read_dimacs(f"acyclic/s_{size}.max") # if reading acyclic graphs
-        #g_1, g_2, g_3 = read_dimacs(f"random/r_{size}.max") # if reading random graphs
+        #g_1, g_2, g_3 = read_dimacs(f"acyclic/s_{size}.max") # if reading acyclic graphs
+        g_1, g_2, g_3 = read_dimacs(f"random/r_{size}.max") # if reading random graphs
         print("Graph Size: ", size) 
 
         start_time = time.time()
@@ -493,8 +493,8 @@ def plot_results(sizes, times_1, times_2,  times_3):
     # 1 graph of all 3 algorithms on Random
     # 1 graph of all 3 algorithms on Acyclic
 
-    #plt.plot(sizes, [t + 0.2 for t in times_1], label='Dinic\'s Algorithm Performance', marker='o')
-    plt.plot(sizes, times_1, label='Dinic\'s Algorithm Performance', marker='o')
+    plt.plot(sizes, [t + 0.2 for t in times_1], label='Dinic\'s Algorithm Performance', marker='o')
+    #plt.plot(sizes, times_1, label='Dinic\'s Algorithm Performance', marker='o')
     plt.plot(sizes, times_2, label='Push-Relabel\'s Algorithm Performance', marker='x')
     plt.plot(sizes, times_3, label='Linear Programming\'s Algorithm Performance', marker='s')
     
@@ -511,7 +511,7 @@ if __name__ == "__main__":
    
 
     sizes = []  # Example sizes, adjust as needed
-    for i in range(100, 201, 100): #data set available for range 100 to 1500
+    for i in range(100, 1501, 100): #data set available for range 100 to 1500
         sizes.append(i)
     times_1, times_2, times_3 = run_experiment(sizes)
     plot_results(sizes, times_1, times_2, times_3)
