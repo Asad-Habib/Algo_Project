@@ -444,7 +444,7 @@ def run_experiment(sizes):
     times_3 = []
     for size in sizes:
         #g_1, g_2 = read_dimacs(f"acyclic/s_{size}.max") # if reading acyclic graphs
-        g_1, g_2, g_3 = read_dimacs(f"Algo_Project//random//r_{size}.max") # if reading random graphs
+        g_1, g_2, g_3 = read_dimacs(f"random/r_{size}.max") # if reading random graphs
         print("Graph Size: ", size) 
 
         start_time = time.time()
