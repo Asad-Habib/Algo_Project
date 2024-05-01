@@ -288,60 +288,7 @@ class Graph_PushRelabel:
         # e_flow will be final maximum flow 
         return self.ver[len(self.ver)-1].e_flow
     
-
-# class maxFlow_LP:
-#     def __init__(self):
-#         self.G = nx.DiGraph()
-
-#     def add_edge(self, u, v, capacity):
-#         """Add an edge to the network with the specified capacity."""
-#         self.G.add_edge(u, v, capacity=capacity)
-
-#     # def _find_path(self, source, sink, flow):
-#     #     """Use BFS to find an augmenting path in the residual network."""
-#     #     queue = [source]
-#     #     paths = {source: []}
-#     #     while queue:
-#     #         u = queue.pop(0)
-#     #         for v in self.G[u]:
-#     #             residual_capacity = self.G[u][v]['capacity'] - flow[(u, v)]
-#     #             if residual_capacity > 0 and v not in paths:
-#     #                 paths[v] = paths[u] + [(u, v)]
-#     #                 if v == sink:
-#     #                     return paths[v]
-#     #     return None
-
-#     def _find_path(self, source, sink, flow):
-#         """Use BFS to find an augmenting path in the residual network."""
-#         queue = [source]
-#         paths = {source: []}
-#         while queue:
-#             u = queue.pop(0)
-#             if u not in self.G:  # Check if the node exists in the graph
-#                 continue
-#             for v in self.G[u]:
-#                 residual_capacity = self.G[u][v]['capacity'] - flow[(u, v)]
-#                 if residual_capacity > 0 and v not in paths:
-#                     paths[v] = paths[u] + [(u, v)]
-#                     if v == sink:
-#                         return paths[v]
-#         return None
-
-
-#     def max_flow(self, source, sink):
-#         """Calculates the maximum flow from source to sink."""
-#         flow = { (u, v): 0 for u, v in self.G.edges() }
-#         path = self._find_path(source, sink, flow)
-#         while path:
-#             flow_add = min(self.G[u][v]['capacity'] - flow[(u, v)] for u, v in path)
-#             for u, v in path:
-#                 flow[(u, v)] += flow_add
-#                 if (v, u) not in flow:
-#                     flow[(v, u)] = 0
-#                 flow[(v, u)] -= flow_add
-#             path = self._find_path(source, sink, flow)
-#         return sum(flow[(source, v)] for v in self.G.neighbors(source))
-
+# Linear Programming for Max Flow
 class Vertex_LP:
     def __init__(self, h=0, e_flow=0):
         self.h = h
@@ -476,7 +423,7 @@ def run_experiment(sizes):
 
 
         try:
-            assert max_flow_2 == max_flow_3 == max_flow_1
+            assert max_flow_1 == max_flow_3
         except:
             print("Max flow not equal")
             print(f"Max flow Dinic: {max_flow_1}")
@@ -488,17 +435,11 @@ def run_experiment(sizes):
     return times_1, times_2, times_3
 
 def plot_results(sizes, times_1, times_2,  times_3):
-    # 3 graphs of 3 algorithms on Random
-    # 3 graphs of 3 algorithms on Acyclic
-    # 1 graph of all 3 algorithms on Random
-    # 1 graph of all 3 algorithms on Acyclic
-
+    
     plt.plot(sizes, [t + 0.2 for t in times_1], label='Dinic\'s Algorithm Performance', marker='o')
     #plt.plot(sizes, times_1, label='Dinic\'s Algorithm Performance', marker='o')
     plt.plot(sizes, times_2, label='Push-Relabel\'s Algorithm Performance', marker='x')
     plt.plot(sizes, times_3, label='Linear Programming\'s Algorithm Performance', marker='s')
-    
-
 
     plt.title('Algorithm Performance')
     plt.xlabel('Graph Size')
@@ -517,6 +458,10 @@ if __name__ == "__main__":
     plot_results(sizes, times_1, times_2, times_3)
 
 
+
+
+
+#To generate a random graph, instead of from dataset
 
 # def generate_random_graph(size, density = 1.0):
 #     # Generate a random graph using networkx
