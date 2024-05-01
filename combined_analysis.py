@@ -289,6 +289,125 @@ class Graph_PushRelabel:
         return self.ver[len(self.ver)-1].e_flow
     
 
+# class maxFlow_LP:
+#     def __init__(self):
+#         self.G = nx.DiGraph()
+
+#     def add_edge(self, u, v, capacity):
+#         """Add an edge to the network with the specified capacity."""
+#         self.G.add_edge(u, v, capacity=capacity)
+
+#     # def _find_path(self, source, sink, flow):
+#     #     """Use BFS to find an augmenting path in the residual network."""
+#     #     queue = [source]
+#     #     paths = {source: []}
+#     #     while queue:
+#     #         u = queue.pop(0)
+#     #         for v in self.G[u]:
+#     #             residual_capacity = self.G[u][v]['capacity'] - flow[(u, v)]
+#     #             if residual_capacity > 0 and v not in paths:
+#     #                 paths[v] = paths[u] + [(u, v)]
+#     #                 if v == sink:
+#     #                     return paths[v]
+#     #     return None
+
+#     def _find_path(self, source, sink, flow):
+#         """Use BFS to find an augmenting path in the residual network."""
+#         queue = [source]
+#         paths = {source: []}
+#         while queue:
+#             u = queue.pop(0)
+#             if u not in self.G:  # Check if the node exists in the graph
+#                 continue
+#             for v in self.G[u]:
+#                 residual_capacity = self.G[u][v]['capacity'] - flow[(u, v)]
+#                 if residual_capacity > 0 and v not in paths:
+#                     paths[v] = paths[u] + [(u, v)]
+#                     if v == sink:
+#                         return paths[v]
+#         return None
+
+
+#     def max_flow(self, source, sink):
+#         """Calculates the maximum flow from source to sink."""
+#         flow = { (u, v): 0 for u, v in self.G.edges() }
+#         path = self._find_path(source, sink, flow)
+#         while path:
+#             flow_add = min(self.G[u][v]['capacity'] - flow[(u, v)] for u, v in path)
+#             for u, v in path:
+#                 flow[(u, v)] += flow_add
+#                 if (v, u) not in flow:
+#                     flow[(v, u)] = 0
+#                 flow[(v, u)] -= flow_add
+#             path = self._find_path(source, sink, flow)
+#         return sum(flow[(source, v)] for v in self.G.neighbors(source))
+
+class Vertex_LP:
+    def __init__(self, h=0, e_flow=0):
+        self.h = h
+        self.e_flow = e_flow
+
+class Edge_LP:
+    def __init__(self, v, capacity, flow=0, rev=None):
+        self.v = v
+        self.capacity = capacity
+        self.flow = flow
+        self.rev = rev  # Reverse edge reference
+
+class maxFlow_LP:
+    def __init__(self, V):
+        self.V = V
+        self.adj = [[] for _ in range(V)]
+
+    def add_edge(self, u, v, capacity):
+        # Add forward edge: u -> v
+        forward_edge = Edge_LP(v, capacity, 0, len(self.adj[v]))
+        # Add reverse edge: v -> u
+        reverse_edge = Edge_LP(u, 0, 0, len(self.adj[u]))
+        self.adj[u].append(forward_edge)
+        self.adj[v].append(reverse_edge)
+
+    def _bfs(self, source, sink):
+        queue = [source]
+        levels = [-1] * self.V
+        levels[source] = 0
+        while queue:
+            u = queue.pop(0)
+            for edge in self.adj[u]:
+                if levels[edge.v] == -1 and edge.flow < edge.capacity:
+                    levels[edge.v] = levels[u] + 1
+                    queue.append(edge.v)
+                    if edge.v == sink:
+                        return levels
+        return levels
+
+    def _dfs(self, u, flow, sink, levels):
+        if u == sink:
+            return flow
+        for edge in self.adj[u]:
+            if levels[edge.v] == levels[u] + 1 and edge.flow < edge.capacity:
+                cur_flow = min(flow, edge.capacity - edge.flow)
+                pushed = self._dfs(edge.v, cur_flow, sink, levels)
+                if pushed > 0:
+                    edge.flow += pushed
+                    # Update reverse flow using the 'rev' attribute to find the reverse edge
+                    self.adj[edge.v][edge.rev].flow -= pushed
+                    return pushed
+        return 0
+
+    def calculate_max_flow(self, source, sink):
+        max_flow = 0
+        while True:
+            levels = self._bfs(source, sink)
+            if levels[sink] == -1:
+                break
+            flow = self._dfs(source, float('inf'), sink, levels)
+            while flow > 0:
+                max_flow += flow
+                flow = self._dfs(source, float('inf'), sink, levels)
+        return max_flow
+
+
 def read_dimacs(file_path):
     with open(file_path, 'r') as f:
         lines = f.readlines()
@@ -308,19 +427,24 @@ def read_dimacs(file_path):
 
     graph_dicnic = Graph_Dinic(num_vertices)
     graph_pushR = Graph_PushRelabel(num_vertices)
+    graph_maxFlowLP = maxFlow_LP(num_vertices)
     for u, v, capacity in edges:
         graph_dicnic.addEdge(u, v, capacity)
         graph_pushR.addEdge(u, v, capacity)
-    return graph_dicnic, graph_pushR
+        graph_maxFlowLP.add_edge(u,v,capacity)
+    print(graph_maxFlowLP)
+
+    return graph_dicnic, graph_pushR, graph_maxFlowLP
 
 
 
 def run_experiment(sizes):
     times_1 = []
     times_2 = []
+    times_3 = []
     for size in sizes:
         #g_1, g_2 = read_dimacs(f"acyclic/s_{size}.max") # if reading acyclic graphs
-        g_1, g_2 = read_dimacs(f"random/r_{size}.max") # if reading random graphs
+        g_1, g_2, g_3 = read_dimacs(f"Algo_Project//random//r_{size}.max") # if reading random graphs
         print("Graph Size: ", size) 
 
         start_time = time.time()
@@ -340,20 +464,34 @@ def run_experiment(sizes):
 
         print(f"Graph PUSH-RELABEL's Time: {elapsed_time}")
 
+        # for Linear Programming of Max flow
+        start_time = time.time()
+        max_flow_3 = g_3.calculate_max_flow(0, size-1)  # Assuming the sink is the last vertex
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        times_3.append(elapsed_time)
+
+        print(f"Graph Linear Programming Time: {elapsed_time}")
+
+
+
         try:
-            assert max_flow_1 == max_flow_2
+            assert max_flow_2 == max_flow_3
         except:
             print("Max flow not equal")
             print(f"Max flow Dinic: {max_flow_1}")
             print(f"Max flow PushRelabel: {max_flow_2}")
+            print(f"Max flow Linear Programming: {max_flow_3}")
             
 
         # print(f"Graph size: {size}, Max flow: {max_flow_1}, Time taken: {elapsed_time} seconds")
-    return times_1, times_2
+    return times_1, times_2, times_3
 
-def plot_results(sizes, times_1, times_2):
+def plot_results(sizes, times_1, times_2,  times_3):
     plt.plot(sizes, times_1, label='Dinic\'s Algorithm Performance', marker='o')
     plt.plot(sizes, times_2, label='Push-Relabel\'s Algorithm Performance', marker='x')
+    plt.plot(sizes, times_3, label='Push-Relabel\'s Algorithm Performance', marker='y')
+
     plt.title('Algorithm Performance')
     plt.xlabel('Graph Size')
     plt.ylabel('Time (seconds)')
@@ -365,8 +503,8 @@ if __name__ == "__main__":
     sizes = [100]  # Example sizes, adjust as needed
     for i in range(100, 1001, 100):
         sizes.append(i)
-    times_1, times_2 = run_experiment(sizes)
-    plot_results(sizes, times_1, times_2)
+    times_1, times_2, times_3 = run_experiment(sizes)
+    plot_results(sizes, times_1, times_2, times_3)
 
 
 
