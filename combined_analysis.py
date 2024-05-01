@@ -432,7 +432,7 @@ def read_dimacs(file_path):
         graph_dicnic.addEdge(u, v, capacity)
         graph_pushR.addEdge(u, v, capacity)
         graph_maxFlowLP.add_edge(u,v,capacity)
-    print(graph_maxFlowLP)
+
 
     return graph_dicnic, graph_pushR, graph_maxFlowLP
 
@@ -443,8 +443,8 @@ def run_experiment(sizes):
     times_2 = []
     times_3 = []
     for size in sizes:
-        #g_1, g_2 = read_dimacs(f"acyclic/s_{size}.max") # if reading acyclic graphs
-        g_1, g_2, g_3 = read_dimacs(f"random/r_{size}.max") # if reading random graphs
+        g_1, g_2, g_3 = read_dimacs(f"acyclic/s_{size}.max") # if reading acyclic graphs
+        #g_1, g_2, g_3 = read_dimacs(f"random/r_{size}.max") # if reading random graphs
         print("Graph Size: ", size) 
 
         start_time = time.time()
@@ -476,7 +476,7 @@ def run_experiment(sizes):
 
 
         try:
-            assert max_flow_2 == max_flow_3
+            assert max_flow_2 == max_flow_3 == max_flow_1
         except:
             print("Max flow not equal")
             print(f"Max flow Dinic: {max_flow_1}")
@@ -488,9 +488,17 @@ def run_experiment(sizes):
     return times_1, times_2, times_3
 
 def plot_results(sizes, times_1, times_2,  times_3):
+    # 3 graphs of 3 algorithms on Random
+    # 3 graphs of 3 algorithms on Acyclic
+    # 1 graph of all 3 algorithms on Random
+    # 1 graph of all 3 algorithms on Acyclic
+
+    #plt.plot(sizes, [t + 0.2 for t in times_1], label='Dinic\'s Algorithm Performance', marker='o')
     plt.plot(sizes, times_1, label='Dinic\'s Algorithm Performance', marker='o')
     plt.plot(sizes, times_2, label='Push-Relabel\'s Algorithm Performance', marker='x')
-    plt.plot(sizes, times_3, label='Push-Relabel\'s Algorithm Performance', marker='y')
+    plt.plot(sizes, times_3, label='Linear Programming\'s Algorithm Performance', marker='s')
+    
+
 
     plt.title('Algorithm Performance')
     plt.xlabel('Graph Size')
@@ -500,8 +508,10 @@ def plot_results(sizes, times_1, times_2,  times_3):
     plt.show()
 
 if __name__ == "__main__":
-    sizes = [100]  # Example sizes, adjust as needed
-    for i in range(100, 1001, 100):
+   
+
+    sizes = []  # Example sizes, adjust as needed
+    for i in range(100, 201, 100): #data set available for range 100 to 1500
         sizes.append(i)
     times_1, times_2, times_3 = run_experiment(sizes)
     plot_results(sizes, times_1, times_2, times_3)
